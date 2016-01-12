@@ -1180,7 +1180,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
                       0.0, fadeFirstBreak);
     vec3 ro = normalize(vec3(sin(an2)*cos(an1), cos(an2)-0.5, sin(an2)*sin(an1)));
     
-    vec2 uv = (2.*fragCoord.xy - iResolution.xy) / iResolution.y;
+    vec2 uv = (2.*(fragCoord.xy+.5) - iResolution.xy) / iResolution.y;
     
     // Camera Transform
     vec3 ww = normalize(vec3(0.,0.,0.) - ro);
@@ -1204,7 +1204,9 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     // --------------------------------------------------------------- //
     // Brute force AA
     // --------------------------------------------------------------- //
-    vec3 eps = vec3(.002, 0.0, -.002);
+    vec2 epSize = .5 / iResolution.xy;
+    //epSize += epSize*.5 * noise1(epSize);
+    vec3 eps = vec3(epSize.y, 0.0, -epSize.y);
     vec3 eps2 = eps*.75;
     #define map(RD) getColor(ro, RD, offset)
     c = (c
@@ -1212,11 +1214,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
       + map(rd+eps.yxy) + map(rd-eps.yxy)
       + map(rd+eps.xxy) + map(rd-eps.xxy)
       + map(rd+eps.xzy) + map(rd-eps.xzy)
-         
-      + map(rd+eps2.xyy) + map(rd-eps2.xyy)
-      + map(rd+eps2.yxy) + map(rd-eps2.yxy)
-         
-      ) / (8. + 4. + 1.);
+      ) / (8. + 1.);
     #undef map
     // --------------------------------------------------------------- //
     #endif
